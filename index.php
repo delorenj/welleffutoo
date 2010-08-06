@@ -16,6 +16,8 @@ if ($session) {
   try {
     $uid = $facebook->getUser();
     $me = $facebook->api('/me');
+    $call = $facebook->api('/me/friends');
+    $friends = $call['data'];
   } catch (FacebookApiException $e) {
     error_log($e);
   }
@@ -73,8 +75,10 @@ $carrie = $facebook->api('/carrie.vitale');
         <fb:login-button></fb:login-button>
       </div>
       <?php endif ?>
-      <h3>Test</h3>
-      <img src="https://graph.facebook.com/carrie.vitale/picture">
-      <?php echo $carrie['name']?>
+
+      <h1><?php echo $me["name"] ?>'s Friend List <?php echo " (".count($friends).")";?></h1>
+      <?php foreach($friends as $f): ?>
+        <? echo $f['name']."<br>"; ?>
+      <?php endforeach ?>
     </body>
 </html>
