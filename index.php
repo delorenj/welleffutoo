@@ -1,6 +1,7 @@
 <?php
 
 require './include/facebook.php';
+require_once './include/db.inc';
 
 $facebook = new Facebook(array(
   'appId'  => '143455525682745',
@@ -18,6 +19,7 @@ if ($session) {
     $me = $facebook->api('/me');
     $call = $facebook->api('/me/friends');
     $friends = $call['data'];
+    $dbFriends = getFriendsFromDB();
   } catch (FacebookApiException $e) {
     error_log($e);
   }
@@ -30,15 +32,18 @@ if ($me) {
   $loginUrl = $facebook->getLoginUrl();
 }
 
-// This call will always work since we are fetching public data.
-$carrie = $facebook->api('/carrie.vitale');
-
 ?>
 
 <html xmlns:fb="http://www.facebook.com/2008/fbml">
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title></title>
+        <script src="http://www.google.com/jsapi?key=ABQIAAAAg5hreqiv4zDpiIkbdnYh2hTzfCc0yQNCbcPtiTLLMI753LI8pxRmlMPmjJmMp2SUicPuSauIcJawDQ"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.0/jquery-ui.min.js"></script>
+        <script src="./js/main.js" type="text/javascript"></script>
+        <script src="./js/jCounter/jquery.jcounter.js" type="text/javascript"></script>
+        <link href="./css/default.css" rel="stylesheet" type="text/css" />
+        <title>WellEffUToo</title>
     </head>
     <body>
       <div id="fb-root"></div>
@@ -76,9 +81,46 @@ $carrie = $facebook->api('/carrie.vitale');
       </div>
       <?php endif ?>
 
-      <h1><?php echo $me["name"] ?>'s Friend List <?php echo " (".count($friends).")";?></h1>
-      <?php foreach($friends as $f): ?>
-        <? echo $f['name']."<br>"; ?>
-      <?php endforeach ?>
+      <h1><?php echo $me["name"] ?>'s Friend List <?php echo " (".getNumFriendsFromDB().")";?></h1>
+      <p>My Facebook UID: <?php echo $me["id"];?></p>
+      <div id="listContainer">
+        <div id="realFriends">
+          <?php foreach($friends as $f): ?>
+            <?php echo $f['id']."<br>"; ?>
+          <?php endforeach ?>
+        </div>
+
+        <div id="dbFriends">
+          <?php foreach($dbFriends as $f): ?>
+          <?php echo $f."<br>"; ?>
+          <?php endforeach; ?>
+        </div>
+      </div>
     </body>
 </html>
+
+<?php
+function test_serialize() {
+  $list = null;
+  for($i=0; $i<20; $i++) {
+    $list[$i] = $i;
+  }
+  echo serialize($list);
+}
+
+function getNumFriendsFromDB() {
+  global $me;
+  $query = 'SELECT num_friends FROM user WHERE id='.$me["id"];
+  $result = mysql_query($query) or die("Error running query:".mysql_error()."\n\nQuery:".$query);
+  $num = mysql_fetch_array($result);
+  return $num[0];
+}
+
+function getFriendsFromDB() {
+  global $me;
+  $query = 'SELECT friends FROM user WHERE id='.$me["id"];
+  $result = mysql_query($query) or die("Error running query:".mysql_error()."\n\nQuery:".$query);
+  $serialized = mysql_fetch_array($result);
+  return unserialize($serialized[0]);
+}
+?>
