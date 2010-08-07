@@ -7,3 +7,31 @@
   width:50%;
   float:right;
 }
+
+#siteshout {
+  padding-top: 15px;
+  display: block;
+}
+
+#siteshout h1 {
+  font-family: arial;
+}
+
+#siteshout img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#sitedesc {
+  margin-top: 20px;
+  margin-left: auto;
+  margin-right:auto;
+  text-align:center;
+  border: 3px dashed black;
+  background-color: #FFFF99;
+  padding:5px;
+  width:75%;
+  font-family: 'IM Fell English', arial, serif;
+  font-size: 1.3em;
+}

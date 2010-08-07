@@ -21,6 +21,7 @@ if ($session) {
     $friends = $call['data'];
     $dbFriends = getFriendsFromDB();
   } catch (FacebookApiException $e) {
+    //header('Location: verify.php');
     error_log($e);
   }
 }
@@ -37,17 +38,18 @@ if ($me) {
 <html xmlns:fb="http://www.facebook.com/2008/fbml">
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <script src="http://www.google.com/jsapi?key=ABQIAAAAg5hreqiv4zDpiIkbdnYh2hTzfCc0yQNCbcPtiTLLMI753LI8pxRmlMPmjJmMp2SUicPuSauIcJawDQ"></script>
-        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
-        <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.0/jquery-ui.min.js"></script>
+        <script src="http://www.google.com/jsapi?key=ABQIAAAAg5hreqiv4zDpiIkbdnYh2hTzfCc0yQNCbcPtiTLLMI753LI8pxRmlMPmjJmMp2SUicPuSauIcJawDQ" type="text/javascript"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js" type="text/javascript"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.0/jquery-ui.min.js" type="text/javascript"></script>
         <script src="./js/main.js" type="text/javascript"></script>
         <script src="./js/jCounter/jquery.jcounter.js" type="text/javascript"></script>
         <link href="./css/default.css" rel="stylesheet" type="text/css" />
+        <link href='http://fonts.googleapis.com/css?family=IM+Fell+English' rel='stylesheet' type='text/css'>
         <title>WellEffUToo</title>
     </head>
     <body>
       <div id="fb-root"></div>
-      <script>
+      <script type="text/javascript">
         window.fbAsyncInit = function() {
           FB.init({
             appId   : '<?php echo $facebook->getAppId(); ?>',
@@ -72,15 +74,7 @@ if ($me) {
       </script>
 
       <?php if ($me): ?>
-      <a href="<?php echo $logoutUrl; ?>">
-        <img src="http://static.ak.fbcdn.net/rsrc.php/z2Y31/hash/cxrz4k7j.gif">
-      </a>
-      <?php else: ?>
-      <div>
-        <fb:login-button></fb:login-button>
-      </div>
-      <?php endif ?>
-
+      <a href="<?php echo $logoutUrl; ?>"><img border="none" src="http://static.ak.fbcdn.net/rsrc.php/z2Y31/hash/cxrz4k7j.gif" alt="logout button"></a>
       <h1><?php echo $me["name"] ?>'s Friend List <?php echo " (".getNumFriendsFromDB().")";?></h1>
       <p>My Facebook UID: <?php echo $me["id"];?></p>
       <div id="listContainer">
@@ -96,6 +90,17 @@ if ($me) {
           <?php endforeach; ?>
         </div>
       </div>
+      <?php else: ?>
+      <div>
+        <fb:login-button></fb:login-button>
+        <div id="siteshout">
+          <img src="./images/facebook-photo-collage.jpg" alt="photo collage" />
+        </div>
+        <div id="sitedesc">
+          <p>Tired of spending hours sifting through your list wondering who was the douche that decided your posts were too annoying to deal with anymore? Make life easier and get notified when your friends dump you!</p>
+        </div>
+      </div>
+      <?php endif ?>
     </body>
 </html>
 
