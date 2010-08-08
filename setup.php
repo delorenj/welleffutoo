@@ -19,12 +19,11 @@ if ($session) {
     $me = $facebook->api('/me');
     $call = $facebook->api('/me/friends');
     $friends = $call['data'];
-    $dbFriends = getFriendsFromDB();
-    if($dbFriends == null) {
-      header('Location: setup.php');
+    if(getNumFriendsFromDB() != null) {
+      header('Location: index.php');
     }
   } catch (FacebookApiException $e) {
-    //header('Location: verify.php');
+    header('Location: index.php');
     error_log($e);
   }
 }
@@ -41,13 +40,14 @@ if ($me) {
 <html xmlns:fb="http://www.facebook.com/2008/fbml">
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <link href='http://fonts.googleapis.com/css?family=IM+Fell+English' rel='stylesheet' type='text/css'>
         <script src="http://www.google.com/jsapi?key=ABQIAAAAg5hreqiv4zDpiIkbdnYh2hTzfCc0yQNCbcPtiTLLMI753LI8pxRmlMPmjJmMp2SUicPuSauIcJawDQ" type="text/javascript"></script>
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js" type="text/javascript"></script>
         <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.0/jquery-ui.min.js" type="text/javascript"></script>
-        <script src="./js/main.js" type="text/javascript"></script>
+        <script src="./js/setup.js" type="text/javascript"></script>
+        <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/themes/dot-luv/jquery-ui.css" rel="stylesheet" type="text/css" />
         <link href="./css/default.css" rel="stylesheet" type="text/css" />
-        <link href='http://fonts.googleapis.com/css?family=IM+Fell+English' rel='stylesheet' type='text/css'>
-        <title>WellEffUToo</title>
+        <title>WellEffUToo Setup</title>
     </head>
     <body>
       <div id="fb-root"></div>
@@ -75,61 +75,27 @@ if ($me) {
         }());
       </script>
 
-      <?php if ($me): ?>
       <a href="<?php echo $logoutUrl; ?>"><img border="none" src="http://static.ak.fbcdn.net/rsrc.php/z2Y31/hash/cxrz4k7j.gif" alt="logout button"></a>
-      <h1><?php echo $me["name"] ?>'s Friend List <?php echo " (".getNumFriendsFromDB().")";?></h1>
-      <p>My Facebook UID: <?php echo $me["id"];?></p>
-      <div id="listContainer">
-        <div id="realFriends">
-          <?php foreach($friends as $f): ?>
-            <?php echo $f['id']."<br>"; ?>
-          <?php endforeach ?>
-        </div>
-
-        <div id="dbFriends">
-          <?php foreach($dbFriends as $f): ?>
-          <?php echo $f."<br>"; ?>
-          <?php endforeach; ?>
-        </div>
-      </div>
-      <?php else: ?>
       <div style="text-align: center">
         <div id="siteshout">
           <img src="./images/facebook-photo-collage.jpg" alt="photo collage" />
         </div>
         <div id="sitedesc">
-          <p>Tired of spending hours sifting through your list wondering who was the douche that decided your posts were too annoying to deal with anymore? Make life easier and get notified when your friends dump you!</p>
-        </div>
-        <div style="margin-top:20px;">
-          <fb:login-button>Try it out!</fb:login-button>
+          <h1>Initializing...</h1>
+          <div id="progressbar-container" style="display:none;">
+            <div id="progressbar"></div>
+          </div>
         </div>
       </div>
-      <?php endif ?>
     </body>
 </html>
 
 <?php
-function test_serialize() {
-  $list = null;
-  for($i=0; $i<20; $i++) {
-    $list[$i] = $i;
-  }
-  echo serialize($list);
-}
-
 function getNumFriendsFromDB() {
   global $me;
   $query = 'SELECT num_friends FROM user WHERE id='.$me["id"];
   $result = mysql_query($query) or die("Error running query:".mysql_error()."\n\nQuery:".$query);
   $num = mysql_fetch_array($result);
   return $num[0];
-}
-
-function getFriendsFromDB() {
-  global $me;
-  $query = 'SELECT friends FROM user WHERE id='.$me["id"];
-  $result = mysql_query($query) or die("Error running query:".mysql_error()."\n\nQuery:".$query);
-  $serialized = mysql_fetch_array($result);
-  return unserialize($serialized[0]);
 }
 ?>
