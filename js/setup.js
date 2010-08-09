@@ -1,5 +1,8 @@
 google.setOnLoadCallback(function(){
 
+});
+
+function initialize() {
   $("#progressbar").progressbar();
   $("#progressbar-container").fadeIn();
   var p = 1;
@@ -12,10 +15,9 @@ google.setOnLoadCallback(function(){
       value: p++
     });
   },10);
-});
-
+}
 function done() {
   FB.api('/me/friends', function(response) {
-    alert(response.data);
+    alert(response.data[0].name);
   });
 }

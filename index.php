@@ -17,11 +17,13 @@ if ($session) {
   try {
     $uid = $facebook->getUser();
     $me = $facebook->api('/me');
-    $call = $facebook->api('/me/friends');
+    $call = $facebook->api('/me/friends?fields=id');
     $friends = $call['data'];
     $dbFriends = getFriendsFromDB();
     if($dbFriends == null) {
-      header('Location: setup.php');
+      initUser();
+      $dbFriends = getFriendsFromDB();
+      header('Location: index.php');
     }
   } catch (FacebookApiException $e) {
     //header('Location: verify.php');
@@ -29,7 +31,6 @@ if ($session) {
   }
 }
 
-// login or logout url will be needed depending on current user state.
 if ($me) {
   $logoutUrl = $facebook->getLogoutUrl();
 } else {
@@ -51,30 +52,6 @@ if ($me) {
     </head>
     <body>
       <div id="fb-root"></div>
-      <script type="text/javascript">
-        window.fbAsyncInit = function() {
-          FB.init({
-            appId   : '<?php echo $facebook->getAppId(); ?>',
-            session : <?php echo json_encode($session); ?>, // don't refetch the session when PHP already has it
-            status  : true, // check login status
-            cookie  : true, // enable cookies to allow the server to access the session
-            xfbml   : true // parse XFBML
-          });
-
-          // whenever the user logs in, we refresh the page
-          FB.Event.subscribe('auth.login', function() {
-            window.location.reload();
-          });
-        };
-
-        (function() {
-          var e = document.createElement('script');
-          e.src = document.location.protocol + '//connect.facebook.net/en_US/all.js';
-          e.async = true;
-          document.getElementById('fb-root').appendChild(e);
-        }());
-      </script>
-
       <?php if ($me): ?>
       <a href="<?php echo $logoutUrl; ?>"><img border="none" src="http://static.ak.fbcdn.net/rsrc.php/z2Y31/hash/cxrz4k7j.gif" alt="logout button"></a>
       <h1><?php echo $me["name"] ?>'s Friend List <?php echo " (".getNumFriendsFromDB().")";?></h1>
@@ -88,7 +65,7 @@ if ($me) {
 
         <div id="dbFriends">
           <?php foreach($dbFriends as $f): ?>
-          <?php echo $f."<br>"; ?>
+          <?php echo $f['id']."<br>"; ?>
           <?php endforeach; ?>
         </div>
       </div>
@@ -101,10 +78,53 @@ if ($me) {
           <p>Tired of spending hours sifting through your list wondering who was the douche that decided your posts were too annoying to deal with anymore? Make life easier and get notified when your friends dump you!</p>
         </div>
         <div style="margin-top:20px;">
-          <fb:login-button>Try it out!</fb:login-button>
+          <fb:login-button id="login">Try it out!</fb:login-button>
+<!--        <input type="button" onClick="location.href='https://graph.facebook.com/oauth/authorize?client_id=143455525682745&scope=offline_access&redirect_uri=http://www.fmlrecovery.com/welleffutoo/facebook_access_token.php'" value="login" />-->
         </div>
       </div>
       <?php endif ?>
+
+      <script type="text/javascript">
+        window.fbAsyncInit = function() {
+          FB.init({
+            appId   : '<?php //echo $facebook->getAppId(); ?>',
+            session : <?php //echo json_encode($session); ?>, // don't refetch the session when PHP already has it
+            status  : true, // check login status
+            cookie  : true, // enable cookies to allow the server to access the session
+            xfbml   : true // parse XFBML
+          });
+
+          // whenever the user logs in, we refresh the page
+          FB.Event.subscribe('auth.login', function() {
+            window.location.reload();
+          });
+          if($('#login')) {
+              $('#login').bind('click', function() {
+                FB.login(handleSessionResponse, {perms:'offline_access'});
+              });
+           }
+              FB.Event.subscribe('auth.logout', function(response) {
+                document.location.href = 'index.php'
+              });
+            };
+
+            function handleSessionResponse(response) {
+              if (!response.session) {
+                return;
+              }
+              $.getJSON("facebook_access_token.php", function(response){
+                alert("main's auth token: "+response.token);
+              });
+              window.location.href = 'index.php';
+            };
+        (function() {
+          var e = document.createElement('script');
+          e.src = document.location.protocol + '//connect.facebook.net/en_US/all.js';
+          e.async = true;
+          document.getElementById('fb-root').appendChild(e);
+        }());
+      </script>
+-->
     </body>
 </html>
 
@@ -115,6 +135,13 @@ function test_serialize() {
     $list[$i] = $i;
   }
   echo serialize($list);
+}
+
+function initUser() {
+  global $me, $friends;
+  $sfriends = addslashes(serialize($friends));
+  $query = 'INSERT INTO user (id, num_friends, friends) VALUES ('.$me["id"].','.count($friends).',\''.$sfriends.'\')';
+  mysql_query($query) or die("Error running query:".mysql_error()."\n\nQuery:".$query);
 }
 
 function getNumFriendsFromDB() {
