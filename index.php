@@ -78,8 +78,7 @@ if ($me) {
           <p>Tired of spending hours sifting through your list wondering who was the douche that decided your posts were too annoying to deal with anymore? Make life easier and get notified when your friends dump you!</p>
         </div>
         <div style="margin-top:20px;">
-          <fb:login-button id="login">Try it out!</fb:login-button>
-<!--        <input type="button" onClick="location.href='https://graph.facebook.com/oauth/authorize?client_id=143455525682745&scope=offline_access&redirect_uri=http://www.fmlrecovery.com/welleffutoo/facebook_access_token.php'" value="login" />-->
+          <fb:login-button size="xlarge" length="long" v="2" perms="offline_access" >Try it out!</fb:login-button>
         </div>
       </div>
       <?php endif ?>
@@ -87,8 +86,8 @@ if ($me) {
       <script type="text/javascript">
         window.fbAsyncInit = function() {
           FB.init({
-            appId   : '<?php //echo $facebook->getAppId(); ?>',
-            session : <?php //echo json_encode($session); ?>, // don't refetch the session when PHP already has it
+            appId   : '<?php echo $facebook->getAppId(); ?>',
+            session : <?php echo json_encode($session); ?>, // don't refetch the session when PHP already has it
             status  : true, // check login status
             cookie  : true, // enable cookies to allow the server to access the session
             xfbml   : true // parse XFBML
@@ -98,25 +97,12 @@ if ($me) {
           FB.Event.subscribe('auth.login', function() {
             window.location.reload();
           });
-          if($('#login')) {
-              $('#login').bind('click', function() {
-                FB.login(handleSessionResponse, {perms:'offline_access'});
-              });
-           }
-              FB.Event.subscribe('auth.logout', function(response) {
-                document.location.href = 'index.php'
-              });
-            };
 
-            function handleSessionResponse(response) {
-              if (!response.session) {
-                return;
-              }
-              $.getJSON("facebook_access_token.php", function(response){
-                alert("main's auth token: "+response.token);
-              });
-              window.location.href = 'index.php';
-            };
+          FB.Event.subscribe('auth.logout', function(response) {
+            document.location.href = 'index.php'
+          });
+        };
+
         (function() {
           var e = document.createElement('script');
           e.src = document.location.protocol + '//connect.facebook.net/en_US/all.js';
@@ -124,7 +110,6 @@ if ($me) {
           document.getElementById('fb-root').appendChild(e);
         }());
       </script>
--->
     </body>
 </html>
 
