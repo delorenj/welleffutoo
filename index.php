@@ -1,4 +1,5 @@
 <?php
+session_start();
 
 require './include/facebook.php';
 require_once './include/db.inc';
@@ -78,7 +79,7 @@ if ($me) {
           <p>Tired of spending hours sifting through your list wondering who was the douche that decided your posts were too annoying to deal with anymore? Make life easier and get notified when your friends dump you!</p>
         </div>
         <div style="margin-top:20px;">
-          <fb:login-button size="xlarge" length="long" v="2" perms="offline_access" >Try it out!</fb:login-button>
+          <fb:login-button size="xlarge" perms="offline_access" length="long" onlogin='window.location="https://graph.facebook.com/oauth/authorize?client_id=<?echo $facebook->getAppId();?>&scope=offline_access&redirect_uri=http://www.fmlrecovery.com/welleffutoo/facebook_access_token.php";' >Try it out!</fb:login-button>
         </div>
       </div>
       <?php endif ?>
@@ -95,7 +96,7 @@ if ($me) {
 
           // whenever the user logs in, we refresh the page
           FB.Event.subscribe('auth.login', function() {
-            window.location.reload();
+            //window.location.reload();
           });
 
           FB.Event.subscribe('auth.logout', function(response) {
@@ -124,6 +125,13 @@ function test_serialize() {
 
 function initUser() {
   global $me, $friends;
+  if(isset($_SESSION["token"])){
+    error_log("index.php: Got access token! TODO: insert into DB under UserID=".$uid);
+  }
+  else {
+    error_log("Error!: No offline_session token available. Can't init user!");
+    header("location:index.php");
+  }
   $sfriends = addslashes(serialize($friends));
   $query = 'INSERT INTO user (id, num_friends, friends) VALUES ('.$me["id"].','.count($friends).',\''.$sfriends.'\')';
   mysql_query($query) or die("Error running query:".mysql_error()."\n\nQuery:".$query);
