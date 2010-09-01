@@ -18,6 +18,7 @@ if ($session) {
   try {
     $uid = $facebook->getUser();
     $me = $facebook->api('/me');
+    $token = getOfflineAccessToken();
     $call = $facebook->api('/me/friends?fields=id');
     $friends = $call['data'];
     $dbFriends = getFriendsFromDB();
@@ -25,6 +26,10 @@ if ($session) {
       initUser();
       $dbFriends = getFriendsFromDB();
       header('Location: index.php');
+    }
+    else if($token == null) {
+      error_log("token was null in db");
+      updateOfflineAccessToken();
     }
   } catch (FacebookApiException $e) {
     //header('Location: verify.php');
@@ -53,7 +58,7 @@ if ($me) {
     </head>
     <body>
       <div id="fb-root"></div>
-      <?php if ($me): ?>
+      <?php if ($me && ($token != NULL)): ?>
       <a href="<?php echo $logoutUrl; ?>"><img border="none" src="http://static.ak.fbcdn.net/rsrc.php/z2Y31/hash/cxrz4k7j.gif" alt="logout button"></a>
       <h1><?php echo $me["name"] ?>'s Friend List <?php echo " (".getNumFriendsFromDB().")";?></h1>
       <p>My Facebook UID: <?php echo $me["id"];?></p>
@@ -96,7 +101,7 @@ if ($me) {
 
           // whenever the user logs in, we refresh the page
           FB.Event.subscribe('auth.login', function() {
-            //window.location.reload();
+            window.location.reload();
           });
 
           FB.Event.subscribe('auth.logout', function(response) {
@@ -124,16 +129,31 @@ function test_serialize() {
 }
 
 function initUser() {
-  global $me, $friends;
+  global $me, $friends, $token;
   if(isset($_SESSION["token"])){
-    error_log("index.php: Got access token! TODO: insert into DB under UserID=".$uid);
+    error_log("index.php: Got access token! Inserting into DB under UserID=".$uid);
+    $token = $_SESSION["token"];
   }
   else {
     error_log("Error!: No offline_session token available. Can't init user!");
     header("location:index.php");
   }
   $sfriends = addslashes(serialize($friends));
-  $query = 'INSERT INTO user (id, num_friends, friends) VALUES ('.$me["id"].','.count($friends).',\''.$sfriends.'\')';
+  $query = 'INSERT INTO user (id, token, num_friends, friends) VALUES ('.$me["id"].',"'.$token.'",'.count($friends).',\''.$sfriends.'\')';
+  mysql_query($query) or die("Error running query:".mysql_error()."\n\nQuery:".$query);
+}
+
+function updateOfflineAccessToken() {
+  global $me, $token;
+  if(isset($_SESSION["token"])){
+    error_log("index.php: Got access token! Inserting into DB under UserID=".$uid);
+    $token = $_SESSION["token"];
+  }
+  else {
+    error_log("Error!: No offline_session token available. Can't init user!");
+    header("location:index.php");
+  }
+  $query = 'UPDATE user SET `token`="'.$token.'" WHERE `id`='.$me["id"];
   mysql_query($query) or die("Error running query:".mysql_error()."\n\nQuery:".$query);
 }
 
@@ -143,6 +163,14 @@ function getNumFriendsFromDB() {
   $result = mysql_query($query) or die("Error running query:".mysql_error()."\n\nQuery:".$query);
   $num = mysql_fetch_array($result);
   return $num[0];
+}
+
+function getOfflineAccessToken() {
+  global $me;
+  $query = 'SELECT token FROM user WHERE id='.$me["id"];
+  $result = mysql_query($query) or die("Error running query:".mysql_error()."\n\nQuery:".$query);
+  $at = mysql_fetch_array($result);
+  return $at[0];
 }
 
 function getFriendsFromDB() {
