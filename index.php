@@ -1,16 +1,11 @@
 <?php
 session_start();
 
-require './include/facebook.php';
+require_once './include/facebook.php';
 require_once './include/db.inc';
+require_once './include/helpers.php';
 
-$facebook = new Facebook(array(
-  'appId'  => '143455525682745',
-  'secret' => 'e12993af8b317072d7bffe725a19d898',
-  'cookie' => true, // enable optional cookie support
-));
-
-$session = $facebook->getSession();
+global $session;
 
 $me = null;
 // Session based API call.
@@ -18,18 +13,21 @@ if ($session) {
   try {
     $uid = $facebook->getUser();
     $me = $facebook->api('/me');
-    $token = getOfflineAccessToken();
+    $token = getOfflineAccessToken($uid);
     $call = $facebook->api('/me/friends?fields=id');
-    $friends = $call['data'];
-    $dbFriends = getFriendsFromDB();
+    $data = $call['data'];
+    $friends[] = null;
+    foreach($data as $friend) {
+      $friends[] = $friend["id"];
+    }
+    $dbFriends = getFriendsFromDB($uid);
     if($dbFriends == null) {
       initUser();
-      $dbFriends = getFriendsFromDB();
-      header('Location: index.php');
+      $dbFriends = getFriendsFromDB($uid);
     }
     else if($token == null) {
       error_log("token was null in db");
-      updateOfflineAccessToken();
+      updateOfflineAccessToken($uid);
     }
   } catch (FacebookApiException $e) {
     //header('Location: verify.php');
@@ -42,7 +40,6 @@ if ($me) {
 } else {
   $loginUrl = $facebook->getLoginUrl();
 }
-
 ?>
 
 <html xmlns:fb="http://www.facebook.com/2008/fbml">
@@ -60,19 +57,24 @@ if ($me) {
       <div id="fb-root"></div>
       <?php if ($me && ($token != NULL)): ?>
       <a href="<?php echo $logoutUrl; ?>"><img border="none" src="http://static.ak.fbcdn.net/rsrc.php/z2Y31/hash/cxrz4k7j.gif" alt="logout button"></a>
-      <h1><?php echo $me["name"] ?>'s Friend List <?php echo " (".getNumFriendsFromDB().")";?></h1>
-      <p>My Facebook UID: <?php echo $me["id"];?></p>
+      <h1><?php echo $me["name"] ?>'s Friend List <?php echo " (".getNumFriendsFromDB($uid).")";?></h1>
+      <p>My Facebook UID: <?php echo $uid;?></p>
       <div id="listContainer">
         <div id="realFriends">
           <?php foreach($friends as $f): ?>
-            <?php echo $f['id']."<br>"; ?>
+            <?php echo $f."<br>"; ?>
           <?php endforeach ?>
         </div>
 
         <div id="dbFriends">
-          <?php foreach($dbFriends as $f): ?>
-          <?php echo $f['id']."<br>"; ?>
-          <?php endforeach; ?>
+          <?php
+            error_log("num dbFriends: ".count($dbFriends));
+            if(!empty ($dbFriends)){
+              foreach($dbFriends as $f) {
+                echo $f."<br>";
+              }
+            }
+          ?>
         </div>
       </div>
       <?php else: ?>
@@ -118,66 +120,23 @@ if ($me) {
       </script>
     </body>
 </html>
-
 <?php
-function test_serialize() {
-  $list = null;
-  for($i=0; $i<20; $i++) {
-    $list[$i] = $i;
-  }
-  echo serialize($list);
-}
-
 function initUser() {
   global $me, $friends, $token;
+  error_log("Initializing user by creating a database entry");
   if(isset($_SESSION["token"])){
-    error_log("index.php: Got access token! Inserting into DB under UserID=".$uid);
+    error_log("index.php: Got access token! Inserting into DB under UserID=".$me["id"]);
     $token = $_SESSION["token"];
   }
   else {
     error_log("Error!: No offline_session token available. Can't init user!");
     header("location:index.php");
   }
-  $sfriends = addslashes(serialize($friends));
+  $friends = array_slice($friends, 1);
+  echo(count($friends));
+  var_dump($friends);
+  $sfriends = serialize($friends);
   $query = 'INSERT INTO user (id, token, num_friends, friends) VALUES ('.$me["id"].',"'.$token.'",'.count($friends).',\''.$sfriends.'\')';
   mysql_query($query) or die("Error running query:".mysql_error()."\n\nQuery:".$query);
-}
-
-function updateOfflineAccessToken() {
-  global $me, $token;
-  if(isset($_SESSION["token"])){
-    error_log("index.php: Got access token! Inserting into DB under UserID=".$uid);
-    $token = $_SESSION["token"];
-  }
-  else {
-    error_log("Error!: No offline_session token available. Can't init user!");
-    header("location:index.php");
-  }
-  $query = 'UPDATE user SET `token`="'.$token.'" WHERE `id`='.$me["id"];
-  mysql_query($query) or die("Error running query:".mysql_error()."\n\nQuery:".$query);
-}
-
-function getNumFriendsFromDB() {
-  global $me;
-  $query = 'SELECT num_friends FROM user WHERE id='.$me["id"];
-  $result = mysql_query($query) or die("Error running query:".mysql_error()."\n\nQuery:".$query);
-  $num = mysql_fetch_array($result);
-  return $num[0];
-}
-
-function getOfflineAccessToken() {
-  global $me;
-  $query = 'SELECT token FROM user WHERE id='.$me["id"];
-  $result = mysql_query($query) or die("Error running query:".mysql_error()."\n\nQuery:".$query);
-  $at = mysql_fetch_array($result);
-  return $at[0];
-}
-
-function getFriendsFromDB() {
-  global $me;
-  $query = 'SELECT friends FROM user WHERE id='.$me["id"];
-  $result = mysql_query($query) or die("Error running query:".mysql_error()."\n\nQuery:".$query);
-  $serialized = mysql_fetch_array($result);
-  return unserialize($serialized[0]);
 }
 ?>
