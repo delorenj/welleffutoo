@@ -6,16 +6,22 @@ require_once 'include/helpers.php';
 
 global $session;
 
-//$uids = getAllIds();
-$uids[0] = "100001538481220";
+$uids = getAllIds();
+//$uids[0] = "100001538481220";
 foreach($uids as $id) {
   $pastFriends = getFriendsFromDB($id);
   $currentFriends = getFriendsFromFacebookAPI($id);
-  print_r("\n\nDB Friends:\n".serialize($pastFriends)."\n\n");
-  print_r("\n\nActual Friends:\n".serialize($currentFriends)."\n\n");
-
-  var_dump($pastFriends);
-  var_dump($currentFriends);
+  $friendDiff = array_diff($pastFriends, $currentFriends);
+  print_r("DB Friends:\n".serialize($pastFriends)."\n");
+  print_r("Actual Friends:\n".serialize($currentFriends)."\n");
+  if(empty($friendDiff)) {
+    print_r("$id: No Delta\n\n");
+  }
+  else {
+    foreach($friendDiff as $x) {
+      print_r("Delta: ".$x." is no longer a friend\n\n");
+    }
+  }
 }
 
 function getFriendsFromFacebookAPI($uid) {
