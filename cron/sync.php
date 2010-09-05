@@ -11,15 +11,28 @@ $uids = getAllIds();
 foreach($uids as $id) {
   $pastFriends = getFriendsFromDB($id);
   $currentFriends = getFriendsFromFacebookAPI($id);
-  $friendDiff = array_diff($pastFriends, $currentFriends);
+  $droppedFriends = array_diff($pastFriends, $currentFriends);
+  $newFriends = array_diff($currentFriends, $pastFriends);
   print_r("DB Friends:\n".serialize($pastFriends)."\n");
   print_r("Actual Friends:\n".serialize($currentFriends)."\n");
-  if(empty($friendDiff)) {
+  if(empty($droppedFriends) && empty($newFriends)) {
     print_r("$id: No Delta\n\n");
+    continue;
+  }
+  if(empty($droppedFriends)) {
+    print_r("$id: No Friends Dropped\n");
   }
   else {
-    foreach($friendDiff as $x) {
-      print_r("Delta: ".$x." is no longer a friend\n\n");
+    foreach($droppedFriends as $x) {
+      print_r("Dumped!: ".$x." is no longer a friend\n");
+    }
+  }
+  if(empty($newFriends)) {
+    print_r("$id: No new friends\n");
+  }
+  else {
+    foreach($newFriends as $x) {
+      print_r("New Friend: ".$x."\n");
     }
   }
 }
