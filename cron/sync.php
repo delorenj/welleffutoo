@@ -15,26 +15,34 @@ foreach($uids as $id) {
   $newFriends = array_diff($currentFriends, $pastFriends);
   print_r("DB Friends:\n".serialize($pastFriends)."\n");
   print_r("Actual Friends:\n".serialize($currentFriends)."\n");
-  if(empty($droppedFriends) && empty($newFriends)) {
+  if(empty($droppedFriends) && empty($newFriends)) {    //If nothing  has changed
     print_r("$id: No Delta\n\n");
-    continue;
+    continue;                                           //then do nothing
   }
-  if(empty($droppedFriends)) {
-    print_r("$id: No Friends Dropped\n");
-  }
-  else {
-    foreach($droppedFriends as $x) {
-      print_r("Dumped!: ".$x." is no longer a friend\n");
+  else {                                                //else do some stuff...
+    if (!empty($droppedFriends)) {                       //if drops exist
+      foreach ($droppedFriends as $x) {                 //for each drop
+        print_r("Dumped!: " . $x . " is no longer a friend\n");
+        SendDropNotification($id, $x);                  //send a notification
+      }
     }
-  }
-  if(empty($newFriends)) {
-    print_r("$id: No new friends\n");
-  }
-  else {
-    foreach($newFriends as $x) {
-      print_r("New Friend: ".$x."\n");
+    if (!empty($newFriends)) {                          //if adds exist
+      foreach ($newFriends as $x) {                     //for each add
+        print_r("New Friend: " . $x . "\n");            //let's just print it
+      }
     }
+    updateFriendsInDatabase($id, $currentFriends);      //regardless of delta, update db
   }
+}
+
+function SendDropNotification($userId, $droppedId) {
+  print_r("Sending Drop Notification to $userId: ($dropped)");
+}
+
+function updateFriendsInDatabase($id, $currentFriends) {
+  $sfriends = addslashes(serialize($currentFriends));
+  $query = 'UPDATE user SET `friends`="'.$sfriends.'" WHERE `id`='.$id;
+  mysql_query($query) or die("Error running query:".mysql_error()."\n\nQuery:".$query);
 }
 
 function getFriendsFromFacebookAPI($uid) {

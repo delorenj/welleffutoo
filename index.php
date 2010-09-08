@@ -1,6 +1,5 @@
 <?php
 session_start();
-
 require_once './include/facebook.php';
 require_once './include/db.inc';
 require_once './include/helpers.php';
