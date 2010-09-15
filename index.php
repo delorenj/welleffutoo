@@ -1,32 +1,30 @@
 <?php
 session_start();
-require_once './include/facebook.php';
-require_once './include/db.inc';
-require_once './include/helpers.php';
+require_once './include/futoo.php';
 
+global $futoo;
 global $session;
+global $me;
 
+$futoo = new futoo();
+$session = $futoo->getSession();
 $me = null;
+
 // Session based API call.
-if ($session) {
+if ($futoo->getSession()) {
   try {
-    $uid = $facebook->getUser();
-    $me = $facebook->api('/me');
-    $token = getOfflineAccessToken($uid);
-    $call = $facebook->api('/me/friends?fields=id');
-    $data = $call['data'];
-    $friends[] = null;
-    foreach($data as $friend) {
-      $friends[] = $friend["id"];
-    }
-    $dbFriends = getFriendsFromDB($uid);
+    $me = $futoo->getMe();
+    $uid = $me['id'];
+    $token = $futoo->getOfflineAccessToken($uid);
+    $dbFriends = $futoo->getFriendsFromDB($uid);
+    $friends = $futoo->getMyFriendsFromFacebookAPI();
     if($dbFriends == null) {
-      initUser();
-      $dbFriends = getFriendsFromDB($uid);
+      $futoo->initUser();
+      $dbFriends = $futoo->getFriendsFromDB($uid);
     }
     else if($token == null) {
       error_log("token was null in db");
-      updateOfflineAccessToken($uid);
+      $futoo->setOfflineAccessToken($uid);
     }
   } catch (FacebookApiException $e) {
     //header('Location: verify.php');
@@ -35,9 +33,9 @@ if ($session) {
 }
 
 if ($me) {
-  $logoutUrl = $facebook->getLogoutUrl();
+  $logoutUrl = $futoo->facebook->getLogoutUrl();
 } else {
-  $loginUrl = $facebook->getLoginUrl();
+  $loginUrl = $futoo->facebook->getLoginUrl();
 }
 ?>
 
@@ -56,7 +54,7 @@ if ($me) {
       <div id="fb-root"></div>
       <?php if ($me && ($token != NULL)): ?>
       <a href="<?php echo $logoutUrl; ?>"><img border="none" src="http://static.ak.fbcdn.net/rsrc.php/z2Y31/hash/cxrz4k7j.gif" alt="logout button"></a>
-      <h1><?php echo $me["name"] ?>'s Friend List <?php echo " (".getNumFriendsFromDB($uid).")";?></h1>
+      <h1><?php echo $me["name"] ?>'s Friend List <?php echo " (".$futoo->getNumFriendsFromDB($uid).")";?></h1>
       <p>My Facebook UID: <?php echo $uid;?></p>
       <div id="listContainer">
         <div id="realFriends">
@@ -85,7 +83,7 @@ if ($me) {
           <p>Tired of spending hours sifting through your list wondering who was the douche that decided your posts were too annoying to deal with anymore? Make life easier and get notified when your friends dump you!</p>
         </div>
         <div style="margin-top:20px;">
-          <fb:login-button size="xlarge" perms="offline_access" length="long" onlogin='window.location="https://graph.facebook.com/oauth/authorize?client_id=<?echo $facebook->getAppId();?>&scope=offline_access&redirect_uri=http://www.fmlrecovery.com/welleffutoo/facebook_access_token.php";' >Try it out!</fb:login-button>
+          <fb:login-button size="xlarge" perms="offline_access,email" length="long" onlogin='window.location="https://graph.facebook.com/oauth/authorize?client_id=<?echo $futoo->getAppId();?>&scope=offline_access&redirect_uri=http://www.fmlrecovery.com/welleffutoo/facebook_access_token.php";' >Try it out!</fb:login-button>
         </div>
       </div>
       <?php endif ?>
@@ -93,8 +91,8 @@ if ($me) {
       <script type="text/javascript">
         window.fbAsyncInit = function() {
           FB.init({
-            appId   : '<?php echo $facebook->getAppId(); ?>',
-            session : <?php echo json_encode($session); ?>, // don't refetch the session when PHP already has it
+            appId   : '<?php echo $futoo->getAppId(); ?>',
+            session : <?php echo json_encode($futoo->getSession()); ?>, // don't refetch the session when PHP already has it
             status  : true, // check login status
             cookie  : true, // enable cookies to allow the server to access the session
             xfbml   : true // parse XFBML
@@ -119,23 +117,3 @@ if ($me) {
       </script>
     </body>
 </html>
-<?php
-function initUser() {
-  global $me, $friends, $token;
-  error_log("Initializing user by creating a database entry");
-  if(isset($_SESSION["token"])){
-    error_log("index.php: Got access token! Inserting into DB under UserID=".$me["id"]);
-    $token = $_SESSION["token"];
-  }
-  else {
-    error_log("Error!: No offline_session token available. Can't init user!");
-    header("location:index.php");
-  }
-  $friends = array_slice($friends, 1);
-  echo(count($friends));
-  var_dump($friends);
-  $sfriends = serialize($friends);
-  $query = 'INSERT INTO user (id, token, num_friends, friends) VALUES ('.$me["id"].',"'.$token.'",'.count($friends).',\''.$sfriends.'\')';
-  mysql_query($query) or die("Error running query:".mysql_error()."\n\nQuery:".$query);
-}
-?>
