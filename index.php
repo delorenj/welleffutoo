@@ -3,12 +3,12 @@ session_start();
 require_once './include/futoo.php';
 
 global $futoo;
-global $session;
 global $me;
+global $friends;
 
 $futoo = new futoo();
-$session = $futoo->getSession();
 $me = null;
+$friends = null;
 
 // Session based API call.
 if ($futoo->getSession()) {
@@ -19,7 +19,7 @@ if ($futoo->getSession()) {
     $dbFriends = $futoo->getFriendsFromDB($uid);
     $friends = $futoo->getMyFriendsFromFacebookAPI();
     if($dbFriends == null) {
-      $futoo->initUser();
+      initUser();
       $dbFriends = $futoo->getFriendsFromDB($uid);
     }
     else if($token == null) {
@@ -117,3 +117,21 @@ if ($me) {
       </script>
     </body>
 </html>
+<?php
+function initUser() {
+  global $me, $friends, $token;
+  error_log("Initializing user by creating a database entry");
+  if(isset($_SESSION["token"])){
+    error_log("index.php: Got access token! Inserting into DB under UserID=".$me["id"]);
+    $token = $_SESSION["token"];
+  }
+  else {
+    error_log("Error!: No offline_session token available. Can't init user!");
+    header("location:index.php");
+  }
+  $friends = array_slice($friends, 1);
+  $sfriends = serialize($friends);
+  $query = 'INSERT INTO user (id, token, num_friends, friends) VALUES ('.$me["id"].',"'.$token.'",'.count($friends).',\''.$sfriends.'\')';
+  mysql_query($query) or die("Error running query:".mysql_error()."\n\nQuery:".$query);
+}
+?>

@@ -21,10 +21,14 @@ class futoo {
     return $this->session;
   }
 
-  public function getMe() {
-    return $this->facebook->api('/me');
+  public function getMe($token = null) {
+    if(isset($token)) {
+      return $this->facebook->api('/me?access_token='.$token);
+    } else {
+      return $this->facebook->api('/me');
+    }
   }
-  
+
   public function SendDropNotification($uid, $dropped) {
     print_r("Sendind Drop Notification :: From:$uid\tTo:$dropped\n");
     $access_token = $this->getOfflineAccessToken($uid);
@@ -93,35 +97,6 @@ class futoo {
     }
     return array_slice($friends, 1);
   }
-
-  public function initUser() {
-  if(!$this->session) {
-    error_log("No Session Detected!: initUser() should only be called with valid session!");
-    return 0;
-  }
-  error_log("Initializing user by creating a database entry");
-  if(isset($_SESSION["token"])){
-    error_log("index.php: Got access token! Inserting into DB under UserID=".$me["id"]);
-    $token = $_SESSION["token"];
-  }
-  else {
-    error_log("Error!: No offline_session token available. Can't init user!");
-    header("location:index.php");
-  }
-  $me = $this->getMe();
-  $call = $this->facebook->api('/me/friends?fields=id');
-  $data = $call['data'];
-  $friends[] = null;
-  foreach ($data as $friend) {
-    $friends[] = $friend["id"];
-  }
-  $friends = array_slice($friends, 1);
-  echo(count($friends));
-  var_dump($friends);
-  $sfriends = serialize($friends);
-  $query = 'INSERT INTO user (id, token, num_friends, friends) VALUES ('.$me["id"].',"'.$token.'",'.count($friends).',\''.$sfriends.'\')';
-  mysql_query($query) or die("Error running query:".mysql_error()."\n\nQuery:".$query);
-}
 
   public function getAppId() {
     return $this->facebook->getAppId();
