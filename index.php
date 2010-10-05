@@ -5,11 +5,12 @@ require_once './include/futoo.php';
 global $futoo;
 global $me;
 global $friends;
+global $drops;
 
 $futoo = new futoo();
 $me = null;
 $friends = null;
-
+$drops = null;
 // Session based API call.
 if ($futoo->getSession()) {
   try {
@@ -25,6 +26,9 @@ if ($futoo->getSession()) {
     else if($token == null) {
       error_log("token was null in db");
       $futoo->setOfflineAccessToken($uid);
+    }
+    else {
+      $drops = $futoo->getDroppedFriends($uid,5);
     }
   } catch (FacebookApiException $e) {
     //header('Location: verify.php');
@@ -46,32 +50,34 @@ if ($me) {
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js" type="text/javascript"></script>
         <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.0/jquery-ui.min.js" type="text/javascript"></script>
         <script src="./js/main.js" type="text/javascript"></script>
+        <link href="./css/reset.css" rel="stylesheet" type="text/css" />
         <link href="./css/default.css" rel="stylesheet" type="text/css" />
         <link href='http://fonts.googleapis.com/css?family=IM+Fell+English' rel='stylesheet' type='text/css'>
         <title>WellEffUToo</title>
     </head>
     <body>
       <div id="fb-root"></div>
+      <div class="clearfix">
+        <a class="logout" href="<?php echo $logoutUrl; ?>"><img border="none" src="http://static.ak.fbcdn.net/rsrc.php/z2Y31/hash/cxrz4k7j.gif" alt="logout button"></a>
+      </div>
       <?php if ($me && ($token != NULL)): ?>
-      <a href="<?php echo $logoutUrl; ?>"><img border="none" src="http://static.ak.fbcdn.net/rsrc.php/z2Y31/hash/cxrz4k7j.gif" alt="logout button"></a>
-      <h1><?php echo $me["name"] ?>'s Friend List <?php echo " (".$futoo->getNumFriendsFromDB($uid).")";?></h1>
-      <p>My Facebook UID: <?php echo $uid;?></p>
-      <div id="listContainer">
-        <div id="realFriends">
-          <?php foreach($friends as $f): ?>
-            <?php echo $f."<br>"; ?>
-          <?php endforeach ?>
-        </div>
-
-        <div id="dbFriends">
-          <?php
-            error_log("num dbFriends: ".count($dbFriends));
-            if(!empty ($dbFriends)){
-              foreach($dbFriends as $f) {
-                echo $f."<br>";
-              }
-            }
-          ?>
+      <div id="header">
+        <h1>Welleffutoo</h1>
+      </div>
+      <div id="content">
+        <div id="droppedFriends">
+          <?php if($drops) { ?>
+            <?php foreach($drops as $d): ?>
+            <div class="friendContainer">
+              <?php echo "<p>Dropped Friend: $d->friend_name</p>"; ?>
+              <?php echo "<img src=".$d->friend_pic." />"; ?>
+            </div>
+            <?php endforeach ?>
+          <?php } else { ?>
+            <div id="nodrops">
+              <h3>No unfriendings yet</h3>
+            </div>
+          <?php } ?>
         </div>
       </div>
       <?php else: ?>

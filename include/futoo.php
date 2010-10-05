@@ -2,6 +2,14 @@
 require_once 'facebook.php';
 require_once 'db.inc';
 
+class drops {
+  public $id;
+  public $user_id;
+  public $friend_name;
+  public $friend_pic;
+  public $time;
+}
+
 class futoo {
 
   private $session;
@@ -138,6 +146,23 @@ class futoo {
     $result = mysql_query($query) or die("Error running query:" . mysql_error() . "\n\nQuery:" . $query);
     $serialized = mysql_fetch_array($result);
     return unserialize($serialized[0]);
+  }
+
+  public function getDroppedFriends($id, $limit) {
+    error_log("Pulling " . $id . "'s last $limit dropped friends from database");
+    $query = 'SELECT * FROM drops WHERE user_id=' . $id . ' LIMIT ' . $limit;
+    $result = mysql_query($query) or die("Error running query:" . mysql_error() . "\n\nQuery:" . $query);
+    while ($row = mysql_fetch_array($result)) {
+      $d = new Drops();
+      $d->id = $row['id'];
+      $d->user_id = $row['user_id'];
+      $d->friend_id = $row['friend_id'];
+      $d->friend_name = $row['friend_name'];
+      $d->friend_pic = $row['friend_pic'];
+      $d->time = $row['time'];
+      $rows[] = $d;
+    }
+    return $rows;
   }
 
   public function getAllIds() {
