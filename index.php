@@ -17,11 +17,13 @@ if ($futoo->getSession()) {
     $me = $futoo->getMe();
     $uid = $me['id'];
     $token = $futoo->getOfflineAccessToken($uid);
+    error_log("TOKEN: $token");
     $dbFriends = $futoo->getFriendsFromDB($uid);
     $friends = $futoo->getMyFriendsFromFacebookAPI();
     if($dbFriends == null) {
       initUser();
       $dbFriends = $futoo->getFriendsFromDB($uid);
+      $drops = $futoo->getDroppedFriends($uid,5);
     }
     else if($token == null) {
       error_log("token was null in db");
@@ -31,7 +33,7 @@ if ($futoo->getSession()) {
       $drops = $futoo->getDroppedFriends($uid,5);
     }
   } catch (FacebookApiException $e) {
-    //header('Location: verify.php');
+    header('Location: index.php');
     error_log($e);
   }
 }
@@ -66,13 +68,19 @@ if ($me) {
       </div>
       <div id="content">
         <div id="droppedFriends">
+          <h2>Recently Dropped Friends</h2>
           <?php if($drops) { ?>
-            <?php foreach($drops as $d): ?>
-            <div class="friendContainer">
-              <?php echo "<p>Dropped Friend: $d->friend_name</p>"; ?>
-              <?php echo "<img src=".$d->friend_pic." />"; ?>
-            </div>
-            <?php endforeach ?>
+            <?php for($i=0; $i<12; $i++): ?>
+              <?php if($i < count($drops)): ?>
+                <?php $d = $drops[$i]; ?>
+                <div class="friendContainer" style="border:none;" id="drop-<?php echo $i; ?>">
+                <?php echo "<fb:profile-pic width=70 height=70 uid=$d->friend_id></fb:profile-pic>"; ?>
+              <?php else: ?>
+                <div class="friendContainer" id="drop-<?php echo $i; ?>">
+                <p>No Drop</p>
+              <?php endif; ?>
+              </div>
+            <?php endfor ?>
           <?php } else { ?>
             <div id="nodrops">
               <h3>No unfriendings yet</h3>
@@ -91,6 +99,7 @@ if ($me) {
         <div style="margin-top:20px;">
           <fb:login-button size="xlarge" perms="offline_access,email" length="long" onlogin='window.location="https://graph.facebook.com/oauth/authorize?client_id=<?echo $futoo->getAppId();?>&scope=offline_access&redirect_uri=http://www.fmlrecovery.com/welleffutoo/facebook_access_token.php";' >Try it out!</fb:login-button>
         </div>
+        <fb:friendpile></fb:friendpile>
       </div>
       <?php endif ?>
 
@@ -137,7 +146,7 @@ function initUser() {
   }
   $friends = array_slice($friends, 1);
   $sfriends = serialize($friends);
-  $query = 'INSERT INTO user (id, token, num_friends, friends) VALUES ('.$me["id"].',"'.$token.'",'.count($friends).',\''.$sfriends.'\')';
+  $query = 'REPLACE INTO user (id, token, num_friends, friends) VALUES ('.$me["id"].',"'.$token.'",'.count($friends).',\''.$sfriends.'\')';
   mysql_query($query) or die("Error running query:".mysql_error()."\n\nQuery:".$query);
 }
 ?>

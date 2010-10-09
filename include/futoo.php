@@ -37,6 +37,14 @@ class futoo {
     }
   }
 
+  public function insertIntoDropsTable($uid, $dropped) {
+    print_r("Adding dropped user to drops table :: Dropped:$dropped\n");
+    $droppee = $this->getUser($dropped);
+    $fname = $droppee['name'];
+    $query = 'INSERT INTO drops (user_id, friend_id, friend_name) VALUES ('.$uid.','.$dropped.',"'.$fname.'")';
+    mysql_query($query) or die("Error running query:".mysql_error()."\n\nQuery:".$query);
+  }
+
   public function SendDropNotification($uid, $dropped) {
     print_r("Sendind Drop Notification :: From:$uid\tTo:$dropped\n");
     $access_token = $this->getOfflineAccessToken($uid);
@@ -57,7 +65,7 @@ class futoo {
 
   public function getUser($uid) {
     print_r("Getting user object: $uid");
-    $access_token = getOfflineAccessToken($uid);
+    $access_token = $this->getOfflineAccessToken($uid);
     $url = "https://graph.facebook.com/" . $uid . "?access_token=" . $access_token;
 //  error_log("URL: ".$url."\n");
     $ch = curl_init();
@@ -66,7 +74,7 @@ class futoo {
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     $content = curl_exec($ch);
     $result_a = json_decode($content, true);
-    $result["name"] = $result_a["name"];
+    $result["name"] = $result_a["name"];    
     return $result;
   }
 
@@ -174,12 +182,9 @@ class futoo {
     return $rows;
   }
 
-  private function test_serialize() {
-    $list = null;
-    for ($i = 0; $i < 20; $i++) {
-      $list[$i] = $i;
-    }
-    echo serialize($list);
+  public function test_getUserParams($uid) {
+   $user = $this->getUser($uid);
+   print_r($user);
   }
 }
 ?>

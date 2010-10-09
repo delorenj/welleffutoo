@@ -24,6 +24,7 @@ foreach($uids as $id) {
       foreach ($droppedFriends as $x) {                 //for each drop
         print_r("Dumped!: " . $x . " is no longer a friend\n");
         $futoo->SendDropNotification($id, $x);                  //send a notification
+        $futoo->insertIntoDropsTable($id, $x);                  //insert new drops into drop table
       }
     }
     if (!empty($newFriends)) {                          //if adds exist

@@ -26,6 +26,7 @@ a.logout { float: right; }
 
 #droppedFriends {
   width:100%;
+  padding:10px 40px;
 }
 
 #content {
@@ -36,10 +37,14 @@ a.logout { float: right; }
 }
 
 div.friendContainer {
-  border-bottom: 2px solid #AAAAAA;
+  text-align: center;
+  border: 2px dashed #AAAAAA;
+  width:70px;
+  margin:15px;
+  float:left;
   padding: 5px;
   background-color: #FFFFFF;
-  min-height: 90px;
+  min-height: 70px;
 }
 
 div.friendContainer:hover {
