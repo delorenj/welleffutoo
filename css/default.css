@@ -49,7 +49,7 @@ div.friendContainer {
 }
 
 div.friendContainer:hover {
-  background-color: #DDDDDD;
+  border: 2px dashed #1111FF;
 }
 
 #dbFriends {
