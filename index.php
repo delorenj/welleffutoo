@@ -73,11 +73,11 @@ if ($me) {
             <?php for($i=0; $i<12; $i++): ?>
               <?php if($i < count($drops)): ?>
                 <?php $d = $drops[$i]; ?>
-                <div class="friendContainer" style="border:none;" id="drop-<?php echo $i; ?>">
-                <?php echo "<fb:profile-pic width=70 height=70 uid=$d->friend_id></fb:profile-pic>"; ?>
+                <div class="friendContainer" style="border:2px dashed blue;" id="drop-<?php echo $i; ?>">
+                <?php echo "<fb:profile-pic width=75 height=75 uid=$d->friend_id></fb:profile-pic>"; ?>
               <?php else: ?>
                 <div class="friendContainer" id="drop-<?php echo $i; ?>">
-                <p>No Drop</p>
+                  <img src="images/sad.jpg" width="75"/>
               <?php endif; ?>
               </div>
             <?php endfor ?>

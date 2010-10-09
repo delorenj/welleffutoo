@@ -26,10 +26,11 @@ a.logout { float: right; }
 
 #droppedFriends {
   width:100%;
-  padding:10px 40px;
+  padding:10px 0px;
 }
 
 #content {
+  width: 98%;
   padding: 10px;
   margin: 0;
   font-family: 'IM Fell English', arial, serif;
@@ -39,12 +40,12 @@ a.logout { float: right; }
 div.friendContainer {
   text-align: center;
   border: 2px dashed #AAAAAA;
-  width:70px;
+  width:75px;
   margin:15px;
   float:left;
   padding: 5px;
   background-color: #FFFFFF;
-  min-height: 70px;
+  height: 75px;
 }
 
 div.friendContainer:hover {
