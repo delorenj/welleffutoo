@@ -11,9 +11,11 @@ a.logout { float: right; }
 #header {
   padding: 5px;
   min-height:70px;
-  width:100%;
+  width:98%;
   background-color: darkslateblue;
   border-bottom: 8px solid #AAAAAA;
+  -moz-border-radius-topleft: 4%;
+  -moz-border-radius-topright: 4%
 }
 
 #header h1 {
@@ -40,6 +42,8 @@ a.logout { float: right; }
 div.friendContainer {
   text-align: center;
   border: 2px dashed #AAAAAA;
+  border-radius: 10%;
+  -moz-border-radius: 10%;
   width:75px;
   margin:15px;
   float:left;
