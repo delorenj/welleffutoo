@@ -4,12 +4,10 @@ require_once './include/futoo.php';
 
 global $futoo;
 global $me;
-global $friends;
 global $drops;
 
 $futoo = new futoo();
 $me = null;
-$friends = null;
 $drops = null;
 // Session based API call.
 if ($futoo->getSession()) {
@@ -17,21 +15,15 @@ if ($futoo->getSession()) {
     $me = $futoo->getMe();
     $uid = $me['id'];
     $token = $futoo->getOfflineAccessToken($uid);
-    error_log("TOKEN: $token");
-    $dbFriends = $futoo->getFriendsFromDB($uid);
-    $friends = $futoo->getMyFriendsFromFacebookAPI();
-    if($dbFriends == null) {
+    if(!$futoo->accountInitialized($uid)) {
+      error_log("User has not yet been initialized");
       initUser();
-      $dbFriends = $futoo->getFriendsFromDB($uid);
-      $drops = $futoo->getDroppedFriends($uid,5);
     }
-    else if($token == null) {
+    if($token == null) {
       error_log("token was null in db");
       $futoo->setOfflineAccessToken($uid);
     }
-    else {
-      $drops = $futoo->getDroppedFriends($uid,5);
-    }
+    $drops = $futoo->getDroppedFriends($uid,10);
   } catch (FacebookApiException $e) {
     header('Location: index.php');
     error_log($e);
@@ -69,23 +61,20 @@ if ($me) {
       <div id="content">
         <div id="droppedFriends">
           <h2>Recently Dropped Friends</h2>
-          <?php if($drops) { ?>
-            <?php for($i=0; $i<12; $i++): ?>
-              <?php if($i < count($drops)): ?>
-                <?php $d = $drops[$i]; ?>
-                <div class="friendContainer" style="border:2px dashed blue;" id="drop-<?php echo $i; ?>">
-                <?php echo "<fb:profile-pic width=75 height=75 uid=$d->friend_id></fb:profile-pic>"; ?>
-              <?php else: ?>
-                <div class="friendContainer" id="drop-<?php echo $i; ?>">
-                  <img src="images/sad.jpg" width="75"/>
-              <?php endif; ?>
-              </div>
-            <?php endfor ?>
-          <?php } else { ?>
-            <div id="nodrops">
-              <h3>No unfriendings yet</h3>
+          <?php for($i=0; $i<12; $i++): ?>
+            <?php if($i < count($drops)): ?>
+              <?php $d = $drops[$i]; ?>
+              <div class="friendContainer" style="border:2px dashed blue;" id="drop-<?php echo $i; ?>">
+              <?php echo "<fb:profile-pic width=75 height=75 uid=$d->friend_id></fb:profile-pic>"; ?>
+            <?php else: ?>
+              <div class="friendContainer" id="drop-<?php echo $i; ?>">
+                <img src="images/sad.jpg" width="75"/>
+            <?php endif; ?>
             </div>
-          <?php } ?>
+          <?php endfor ?>
+          <?php if(!$drops): ?>
+            <h3>Awesome! No droppings yet!</h3>
+          <?php endif ?>
         </div>
       </div>
       <?php else: ?>
@@ -134,7 +123,7 @@ if ($me) {
 </html>
 <?php
 function initUser() {
-  global $me, $friends, $token;
+  global $me, $token;
   error_log("Initializing user by creating a database entry");
   if(isset($_SESSION["token"])){
     error_log("index.php: Got access token! Inserting into DB under UserID=".$me["id"]);
@@ -144,6 +133,7 @@ function initUser() {
     error_log("Error!: No offline_session token available. Can't init user!");
     header("location:index.php");
   }
+  $friends = $futoo->getMyFriendsFromFacebookAPI();
   $friends = array_slice($friends, 1);
   $sfriends = serialize($friends);
   $query = 'REPLACE INTO user (id, token, num_friends, friends) VALUES ('.$me["id"].',"'.$token.'",'.count($friends).',\''.$sfriends.'\')';

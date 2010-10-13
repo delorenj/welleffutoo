@@ -31,6 +31,11 @@ a.logout { float: right; }
   padding:10px 0px;
 }
 
+#droppedFriends h3 {
+  text-align:center;
+  color:#1111ff;
+}
+
 #content {
   width: 98%;
   padding: 10px;

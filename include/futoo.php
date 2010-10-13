@@ -140,6 +140,16 @@ class futoo {
     return $num[0];
   }
 
+  public function accountInitialized($uid) {
+    error_log("Checking for existing account: $uid");
+    $query = 'SELECT COUNT(*) FROM user WHERE id=' . $uid;
+    $result = mysql_query($query) or die("Error running query:" . mysql_error() . "\n\nQuery:" . $query);
+    $num = mysql_fetch_array($result);
+    error_log("num = $num[0]");
+    return $num[0];
+
+  }
+
   public function getOfflineAccessToken($id) {
     error_log("Pulling offline access token from database");
     $query = 'SELECT token FROM user WHERE id=' . $id;
