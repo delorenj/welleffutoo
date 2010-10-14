@@ -123,7 +123,7 @@ if ($me) {
 </html>
 <?php
 function initUser() {
-  global $me, $token;
+  global $me, $token, $futoo;
   error_log("Initializing user by creating a database entry");
   if(isset($_SESSION["token"])){
     error_log("index.php: Got access token! Inserting into DB under UserID=".$me["id"]);
