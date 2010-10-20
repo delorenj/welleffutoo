@@ -66,8 +66,7 @@ class futoo {
   public function getUser($uid) {
     print_r("Getting user object: $uid");
     $access_token = $this->getOfflineAccessToken($uid);
-    $url = "https://graph.facebook.com/" . $uid . "?access_token=" . $access_token;
-//  error_log("URL: ".$url."\n");
+    $url = "https://graph.facebook.com/" . $uid . "?fields=name&access_token=" . $access_token;
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows; U; Windows NT 5.1; rv:1.7.3) Gecko/20041001 Firefox/0.10.1");
     curl_setopt($ch, CURLOPT_URL, $url);

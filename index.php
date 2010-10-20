@@ -65,7 +65,8 @@ if ($me) {
             <?php if($i < count($drops)): ?>
               <?php $d = $drops[$i]; ?>
               <div class="friendContainer" style="border:2px dashed blue;" id="drop-<?php echo $i; ?>">
-              <?php echo "<fb:profile-pic width=75 height=75 uid=$d->friend_id></fb:profile-pic>"; ?>
+                <a class="x" href="#"><img src="images/x.png" /></a>
+                <?php echo "<div class='droppic'><fb:profile-pic width=70 height=70 uid=$d->friend_id></fb:profile-pic></div>"; ?>
             <?php else: ?>
               <div class="friendContainer" id="drop-<?php echo $i; ?>">
                 <img src="images/sad.jpg" width="75"/>

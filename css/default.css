@@ -13,7 +13,7 @@ a.logout { float: right; }
   min-height:70px;
   width:98%;
   background-color: darkslateblue;
-  border-bottom: 8px solid #AAAAAA;
+  border-bottom: 12px solid #AAAAAA;
   -moz-border-radius-topleft: 4%;
   -moz-border-radius-topright: 4%
 }
@@ -59,6 +59,16 @@ div.friendContainer {
 
 div.friendContainer:hover {
   border: 2px dashed #1111FF;
+}
+
+div.friendContainer div.droppic {
+  position: relative;
+  top: -18px;
+}
+div.friendContainer a.x {
+  position:relative;
+  top: -15px;
+  left: 40px;
 }
 
 #dbFriends {

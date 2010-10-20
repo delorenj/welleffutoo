@@ -7,6 +7,7 @@ global $futoo;
 $futoo = new futoo();
 
 $uids = $futoo->getAllIds();
+//$uids[0] = "100001538481220";
 foreach($uids as $id) {
   $pastFriends = $futoo->getFriendsFromDB($id);
   $currentFriends = $futoo->getFriendsFromFacebookAPI($id);
