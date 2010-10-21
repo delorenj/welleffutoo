@@ -45,6 +45,7 @@ if ($me) {
         <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.0/jquery-ui.min.js" type="text/javascript"></script>
         <script src="./js/main.js" type="text/javascript"></script>
         <link href="./css/reset.css" rel="stylesheet" type="text/css" />
+        <link href="./css/jquery-ui.css" rel="stylesheet" type="text/css" />
         <link href="./css/default.css" rel="stylesheet" type="text/css" />
         <link href='http://fonts.googleapis.com/css?family=IM+Fell+English' rel='stylesheet' type='text/css'>
         <title>WellEffUToo</title>
@@ -65,7 +66,6 @@ if ($me) {
             <?php if($i < count($drops)): ?>
               <?php $d = $drops[$i]; ?>
               <div class="friendContainer" style="border:2px dashed blue;" id="drop-<?php echo $i; ?>">
-                <a class="x" href="#"><img src="images/x.png" /></a>
                 <?php echo "<div class='droppic'><fb:profile-pic width=70 height=70 uid=$d->friend_id></fb:profile-pic></div>"; ?>
             <?php else: ?>
               <div class="friendContainer" id="drop-<?php echo $i; ?>">
@@ -75,6 +75,10 @@ if ($me) {
           <?php endfor ?>
           <?php if(!$drops): ?>
             <h3>Awesome! No droppings yet!</h3>
+          <?php else: ?>
+            <div style="width:100%; text-align: center; margin-top:20px;">
+              <button id="btn-cleardrops" onClick="clearDrops();">Clear Drop History</button>
+            </div>
           <?php endif ?>
         </div>
       </div>

@@ -57,13 +57,18 @@ div.friendContainer {
   height: 75px;
 }
 
+#btn-cleardrops {
+  margin-left: auto;
+  margin-right: auto;
+}
+
 div.friendContainer:hover {
   border: 2px dashed #1111FF;
 }
 
 div.friendContainer div.droppic {
-  position: relative;
-  top: -18px;
+/*  position: relative;
+  top: -18px;*/
 }
 div.friendContainer a.x {
   position:relative;
