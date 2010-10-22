@@ -59,6 +59,11 @@ if ($me) {
       <div id="header">
         <h1>Welleffutoo</h1>
       </div>
+        <div id="email-notification-setting">
+          <label>Email notifications: </label>
+          <input type="radio" name="email-notification" checked />On
+          <input type="radio" name="email-notification" />Off
+        </div>
       <div id="content">
         <div id="droppedFriends">
           <h2>Recently Dropped Friends</h2>

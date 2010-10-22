@@ -46,6 +46,7 @@ class futoo {
   }
 
   public function SendDropNotification($uid, $dropped) {
+    if(!$this->email_activated($uid)) return;
     print_r("Sendind Drop Notification :: From:$uid\tTo:$dropped\n");
     $access_token = $this->getOfflineAccessToken($uid);
     $droppee = $this->getUser($dropped);
@@ -194,6 +195,13 @@ class futoo {
   public function test_getUserParams($uid) {
    $user = $this->getUser($uid);
    print_r($user);
+  }
+  public function email_activated($uid) {
+    $query = 'SELECT email_notifications FROM user WHERE id=' . $id;
+    $result = mysql_query($query) or die("Error running query:" . mysql_error() . "\n\nQuery:" . $query);
+    $at = mysql_fetch_array($result);
+    return $at[0];
+
   }
 }
 ?>

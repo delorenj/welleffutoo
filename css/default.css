@@ -14,8 +14,10 @@ a.logout { float: right; }
   width:98%;
   background-color: darkslateblue;
   border-bottom: 12px solid #AAAAAA;
+  border-radius-topleft: 4%;
+  border-radius-topright: 4%;
   -moz-border-radius-topleft: 4%;
-  -moz-border-radius-topright: 4%
+  -moz-border-radius-topright: 4%;
 }
 
 #header h1 {
@@ -28,12 +30,17 @@ a.logout { float: right; }
 
 #droppedFriends {
   width:100%;
-  padding:10px 0px;
+  padding: 10px 0px;
 }
 
 #droppedFriends h3 {
   text-align:center;
   color:#1111ff;
+}
+
+#email-notification-setting {
+  float:right;
+  padding-right: 20px;
 }
 
 #content {
@@ -47,10 +54,10 @@ a.logout { float: right; }
 div.friendContainer {
   text-align: center;
   border: 2px dashed #AAAAAA;
-  border-radius: 10%;
   -moz-border-radius: 10%;
+  border-radius: 10%;
   width:75px;
-  margin:15px;
+  margin:17px;
   float:left;
   padding: 5px;
   background-color: #FFFFFF;
