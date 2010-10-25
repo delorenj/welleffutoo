@@ -61,8 +61,8 @@ if ($me) {
       </div>
         <div id="email-notification-setting">
           <label>Email notifications: </label>
-          <input type="radio" name="email-notification" checked />On
-          <input type="radio" name="email-notification" />Off
+          <input type="radio" name="email-notification" id="email-on" value="1" checked />On
+          <input type="radio" name="email-notification" id="email-off" value="0" />Off
         </div>
       <div id="content">
         <div id="droppedFriends">
