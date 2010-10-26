@@ -5,6 +5,8 @@ $futoo = new futoo();
 $uids = $futoo->getAllIds();
 #$uids[0] = "100001538481220";
 foreach($uids as $id) {
+  $user = $futoo->getUser($id);
+  print_r("Processing: ".$user["name"]."\n");
   $pastFriends = $futoo->getFriendsFromDB($id);
   $currentFriends = $futoo->getFriendsFromFacebookAPI($id);
   $droppedFriends = array_diff($pastFriends, $currentFriends);
