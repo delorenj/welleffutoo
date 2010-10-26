@@ -14,14 +14,9 @@ if ($futoo->getSession()) {
   try {
     $me = $futoo->getMe();
     $uid = $me['id'];
-    $token = $futoo->getOfflineAccessToken($uid);
     if(!$futoo->accountInitialized($uid)) {
       error_log("User has not yet been initialized");
       initUser();
-    }
-    if($token == null) {
-      error_log("token was null in db");
-      $futoo->setOfflineAccessToken($uid);
     }
     $drops = $futoo->getDroppedFriends($uid,10);
   } catch (FacebookApiException $e) {
@@ -55,7 +50,7 @@ if ($me) {
       <div class="clearfix">
         <a class="logout" href="<?php echo $logoutUrl; ?>"><img border="none" src="http://static.ak.fbcdn.net/rsrc.php/z2Y31/hash/cxrz4k7j.gif" alt="logout button"></a>
       </div>
-      <?php if ($me && ($token != NULL)): ?>
+      <?php if ($me && $futoo->accountInitialized($uid)): ?>
       <div id="header">
         <h1>Welleffutoo</h1>
       </div>
@@ -93,12 +88,12 @@ if ($me) {
           <img src="./images/facebook-photo-collage.jpg" alt="photo collage" />
         </div>
         <div id="sitedesc">
-          <p>Tired of spending hours sifting through your list wondering who was the douche that decided your posts were too annoying to deal with anymore? Make life easier and get notified when your friends dump you!</p>
+          <p>Tired of spending hours sifting through your list wondering who decided your posts were too annoying to deal with anymore? Make life easier and get notified when your friends dump you!</p>
         </div>
         <div style="margin-top:20px;">
           <fb:login-button size="xlarge" perms="offline_access,email" length="long" onlogin='window.location="https://graph.facebook.com/oauth/authorize?client_id=<?echo $futoo->getAppId();?>&scope=offline_access&redirect_uri=http://www.fmlrecovery.com/welleffutoo/facebook_access_token.php";' >Try it out!</fb:login-button>
         </div>
-        <fb:friendpile></fb:friendpile>
+        <div style="margin-top:45px;"><fb:friendpile></fb:friendpile></div>
       </div>
       <?php endif ?>
 

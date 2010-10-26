@@ -41,13 +41,13 @@ class futoo {
     print_r("Adding dropped user to drops table :: Dropped:$dropped\n");
     $droppee = $this->getUser($dropped);
     $fname = $droppee['name'];
-    $query = 'INSERT INTO drops (user_id, friend_id, friend_name) VALUES ('.$uid.','.$dropped.',"'.$fname.'")';
+    $query = 'INSERT INTO drops (user_id, friend_id) VALUES ('.$uid.','.$dropped.')';
     mysql_query($query) or die("Error running query:".mysql_error()."\n\nQuery:".$query);
   }
 
   public function SendDropNotification($uid, $dropped) {
     if(!$this->email_activated($uid)) return;
-    print_r("Sendind Drop Notification :: From:$uid\tTo:$dropped\n");
+    print_r("Sendind Drop Notification :: To:$uid\tSubject:$dropped\n");
     $access_token = $this->getOfflineAccessToken($uid);
     $droppee = $this->getUser($dropped);
     $sendemail_url = "https://api.facebook.com/method/notifications.sendEmail?recipients=" . $uid .
@@ -65,7 +65,7 @@ class futoo {
   }
 
   public function getUser($uid) {
-    print_r("Getting user object: $uid");
+#    print_r("Getting user object: $uid");
     $access_token = $this->getOfflineAccessToken($uid);
     $url = "https://graph.facebook.com/" . $uid . "?fields=name&access_token=" . $access_token;
     $ch = curl_init();
@@ -95,7 +95,7 @@ class futoo {
   }
   
   public function getFriendsFromFacebookAPI($uid) {
-    error_log("Querying for " . $uid . "'s friends using FB API");
+#    error_log("Querying for " . $this->getUser($uid) . "'s friends using FB API");
     $access_token = $this->getOfflineAccessToken($uid);
 //  error_log("Token: ". $access_token);
     $friendurl = "https://graph.facebook.com/" . $uid . "/friends?fields=id&access_token=" . $access_token;
@@ -145,7 +145,7 @@ class futoo {
     $query = 'SELECT COUNT(*) FROM user WHERE id=' . $uid;
     $result = mysql_query($query) or die("Error running query:" . mysql_error() . "\n\nQuery:" . $query);
     $num = mysql_fetch_array($result);
-    return $num[0];
+    return ((int)$num[0] > 0 ? true:false);
 
   }
 
@@ -158,7 +158,7 @@ class futoo {
   }
 
   public function getFriendsFromDB($id) {
-    error_log("Pulling " . $id . "'s friends from database");
+#    error_log("Pulling " . $id . "'s friends from database");
     $query = 'SELECT friends FROM user WHERE id=' . $id;
     $result = mysql_query($query) or die("Error running query:" . mysql_error() . "\n\nQuery:" . $query);
     $serialized = mysql_fetch_array($result);
@@ -166,7 +166,7 @@ class futoo {
   }
 
   public function getDroppedFriends($id, $limit) {
-    error_log("Pulling " . $id . "'s last $limit dropped friends from database");
+#    error_log("Pulling " . $id . "'s last $limit dropped friends from database");
     $query = 'SELECT * FROM drops WHERE user_id=' . $id . ' LIMIT ' . $limit;
     $result = mysql_query($query) or die("Error running query:" . mysql_error() . "\n\nQuery:" . $query);
     while ($row = mysql_fetch_array($result)) {
@@ -196,10 +196,10 @@ class futoo {
    print_r($user);
   }
   public function email_activated($uid) {
-    $query = 'SELECT email_notifications FROM user WHERE id=' . $id;
+    $query = 'SELECT email_notification FROM user WHERE id=' . $uid;
     $result = mysql_query($query) or die("Error running query:" . mysql_error() . "\n\nQuery:" . $query);
     $at = mysql_fetch_array($result);
-    return $at[0];
+    return ($at[0] == "0" ? false:true);
 
   }
 }

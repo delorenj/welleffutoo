@@ -23,11 +23,6 @@ foreach($uids as $id) {
         $futoo->insertIntoDropsTable($id, $x);                  //insert new drops into drop table
       }
     }
-//    if (!empty($newFriends)) {                          //if adds exist
-//      foreach ($newFriends as $x) {                     //for each add
-//        print_r("New Friend: " . $x . "\n");            //let's just print it
-//      }
-//    }
     $futoo->updateFriendsInDatabase($id, $currentFriends);      //regardless of delta, update db
   }
 }

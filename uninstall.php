@@ -5,8 +5,11 @@ error_log("called uninstall: ".$req);
 $result = parse_signed_request($req, "e12993af8b317072d7bffe725a19d898");
 $uid = $result['user_id'];
 
-error_log("Deleting user from DB: ".$uid);
+error_log("Deleting user and associated dropsf rom DB: ".$uid);
 $query = "DELETE FROM user WHERE id='".$uid."'";
+mysql_query($query) or die("Error running query:".mysql_error()."\n\nQuery:".$query);
+
+$query = "DELETE FROM drops WHERE user_id='".$uid."'";
 mysql_query($query) or die("Error running query:".mysql_error()."\n\nQuery:".$query);
 
 
