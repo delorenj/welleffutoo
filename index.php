@@ -14,10 +14,6 @@ if ($futoo->getSession()) {
   try {
     $me = $futoo->getMe();
     $uid = $me['id'];
-    if(!$futoo->accountInitialized($uid)) {
-      error_log("User has not yet been initialized");
-      initUser();
-    }
     $drops = $futoo->getDroppedFriends($uid,10);
   } catch (FacebookApiException $e) {
     header('Location: index.php');

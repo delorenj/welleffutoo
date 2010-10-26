@@ -1,6 +1,10 @@
 <?php
-session_start();
-unset($_SESSION["token"]);
+#session_start();
+#unset($_SESSION["token"]);
+require_once 'include/futoo.php';
+global $futoo;
+$futoo = new futoo();
+$me = $futoo->getMe();
 $tries = 0;
 do {
   error_log("Generating Access Token: attempt #$tries");
@@ -10,7 +14,12 @@ do {
 
 if($token[1]) {
   error_log("Got Token: ".$token[1]);
-  $_SESSION["token"] = $token[1];
+#  $_SESSION["token"] = $token[1];
+  $friends = $futoo->getMyFriendsFromFacebookAPI();
+  $friends = array_slice($friends, 1);
+  $sfriends = serialize($friends);
+  $query = 'REPLACE INTO user (id, token, num_friends, friends) VALUES ('.$me["id"].',"'.$token[1].'",'.count($friends).',\''.$sfriends.'\')';
+  mysql_query($query) or die("Error running query:".mysql_error()."\n\nQuery:".$query);
   header("location:index.php");
 }
 else {
