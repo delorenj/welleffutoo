@@ -95,18 +95,23 @@ class futoo {
   }
   
   public function getFriendsFromFacebookAPI($uid) {
-#    error_log("Querying for " . $this->getUser($uid) . "'s friends using FB API");
+    #error_log("Querying for " . $this->getUser($uid) . "'s friends using FB API");
     $access_token = $this->getOfflineAccessToken($uid);
-//  error_log("Token: ". $access_token);
+    #error_log("Token: ". $access_token);
     $friendurl = "https://graph.facebook.com/" . $uid . "/friends?fields=id&access_token=" . $access_token;
-//  error_log("URL: ".$friendurl);
+    error_log("URL: ".$friendurl);
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows; U; Windows NT 5.1; rv:1.7.3) Gecko/20041001 Firefox/0.10.1");
     curl_setopt($ch, CURLOPT_URL, $friendurl);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $content = curl_exec($ch);
-    $result_a = json_decode($content, true);
-    $data = $result_a["data"];
+    do {
+      $content = curl_exec($ch);
+      #error_log("Content: ".$content);
+      $result_a = json_decode($content, true);
+      #error_log("result_a: ".$result_a);
+      $data = $result_a["data"];
+      error_log("data: ".$data);
+    }while(!isset($data));
     $friends[] = null;
     foreach ($data as $friend) {
       $friends[] = $friend["id"];
